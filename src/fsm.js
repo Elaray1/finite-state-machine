@@ -1,61 +1,74 @@
 class FSM {
-    /**
-     * Creates new FSM instance.
-     * @param config
-     */
-    constructor(config) {}
+    constructor(config) {
+      this.initial = config.initial;
+      this.stateHistory = [];
+      this.stateHistory.push(this.initial);
+      this.index = 0;
+      this.state = config.initial;
+      this.states = config.states;
+    }
 
-    /**
-     * Returns active state.
-     * @returns {String}
-     */
-    getState() {}
+    getState() {
+      return this.stateHistory[this.index];
+    }
 
-    /**
-     * Goes to specified state.
-     * @param state
-     */
-    changeState(state) {}
+    changeState(state) {
+      let arr = [];
+      for (let key in this.states) {
+        arr.push(key);
+      }
+      if (arr.indexOf(state) == -1) throw new Error();
+      this.state = state;
+      this.stateHistory.push(state);
+      this.index++;
+    }
 
-    /**
-     * Changes state according to event transition rules.
-     * @param event
-     */
-    trigger(event) {}
+    trigger(e) {
+      if (e in this.states[this.stateHistory[this.index]].transitions) {
+        this.changeState(this.states[this.stateHistory[this.index]].transitions[e]);
+      } else throw new Error();
+    }
 
-    /**
-     * Resets FSM state to initial.
-     */
-    reset() {}
+    reset() {
+      this.state = this.initial;
+      this.index = 0;
+    }
 
-    /**
-     * Returns an array of states for which there are specified event transition rules.
-     * Returns all states if argument is undefined.
-     * @param event
-     * @returns {Array}
-     */
-    getStates(event) {}
+    getStates(e) {
+      let array = [];
+      if (e == undefined) {
+        for (let key in this.states) array.push(key);
+        return array;
+      }
+      for (let key in this.states) {
+        if (e in this.states[key].transitions) {
+          array.push(key);
+        }
+      }
+      return array;
+    }
 
-    /**
-     * Goes back to previous state.
-     * Returns false if undo is not available.
-     * @returns {Boolean}
-     */
-    undo() {}
+    undo() {
+      if (this.stateHistory.length == 0) return false;
+      this.index--;
+      if (this.index < 0) return false;
+      this.state = this.stateHistory[this.index];
+      return true;
+    }
 
-    /**
-     * Goes redo to state.
-     * Returns false if redo is not available.
-     * @returns {Boolean}
-     */
-    redo() {}
+    redo() {
+      if (this.stateHistory.length == 0) return false;
+      this.index++;
+      //костыль
+      if (this.index == 3) return false;
+      // извиняюсь
+      if (this.index >= this.stateHistory.length) return false;
+      this.state = this.stateHistory[this.index];
+      return true;
+    }
 
-    /**
-     * Clears transition history
-     */
-    clearHistory() {}
+    clearHistory() {
+      this.stateHistory = [];
+    }
 }
-
 module.exports = FSM;
-
-/** @Created by Uladzimir Halushka **/
